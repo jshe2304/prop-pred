@@ -1,6 +1,6 @@
 import numpy as np
 
-import pubchempy
+#import pubchempy
 from rdkit import Chem
 from rdkit.Chem import MolFromSmiles
 from rdkit.Chem import AllChem
@@ -8,9 +8,9 @@ from rdkit.Chem import AllChem
 class Fingerprinter:
     def __init__(self):
     
-        self.morgan = AllChem.GetMorganGenerator()
+        self.morgan = AllChem.GetMorganGenerator(radius=2)
 
-    def __call__(smiles):
+    def __call__(self, smiles):
         '''
         Fingerprint a list of SMILES
         '''
@@ -22,9 +22,8 @@ class Fingerprinter:
         for smile in smiles:
 
             morgan = self.morgan.GetFingerprintAsNumPy(MolFromSmiles(smile))
-            pubchem = np.fromiter(pubchempy.get_compounds(smile, 'smiles')[0].cactvs_fingerprint, dtype='uint8')
+            #pubchem = np.fromiter(pubchempy.get_compounds(smile, 'smiles')[0].cactvs_fingerprint, dtype='uint8')
 
-            fingerprints.append(np.concatenate((morgan, pubchem)))
+            fingerprints.append(morgan)
 
-        return fingerprints
-        
+        return np.stack(fingerprints)
