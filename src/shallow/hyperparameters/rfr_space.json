@@ -1,0 +1,7 @@
+{
+    "n_estimators": [50, 100, 250, 500, 1000], 
+     "max_depth": [ 2,  4,  6,  8, 12], 
+     "min_samples_leaf": [1, 4, 16], 
+     "min_impurity_decrease": [0.0000, 0.001, 0.01], 
+     "max_features": ["sqrt", "log2", 0.7, 0.85, 1.0]
+}

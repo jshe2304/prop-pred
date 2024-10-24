@@ -1,0 +1,105 @@
+{
+    "model": "mlp",
+    "grid_len": 500,
+    "properties": {
+        "Viability Mask 1": {
+            "score": 4.827976226806641e-06,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.4,
+                "weight_decay": 0.01,
+                "width": 32
+            }
+        },
+        "Viability Mask 2": {
+            "score": 0.0,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.0,
+                "weight_decay": 0.01,
+                "width": 512
+            }
+        },
+        "LPS Abs": {
+            "score": 0.0,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.0,
+                "weight_decay": 0.0075,
+                "width": 512
+            }
+        },
+        "LPS Lum": {
+            "score": 0.0,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.0,
+                "weight_decay": 0.01,
+                "width": 512
+            }
+        },
+        "MPLA Abs": {
+            "score": 0.024358689785003662,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.3,
+                "weight_decay": 0.0075,
+                "width": 32
+            }
+        },
+        "MPLA Lum": {
+            "score": 4.172325134277344e-07,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.1,
+                "weight_decay": 0.01,
+                "width": 32
+            }
+        },
+        "CpG Abs": {
+            "score": 0.04461312294006348,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.0,
+                "weight_decay": 0.0075,
+                "width": 512
+            }
+        },
+        "cGAMP Abs": {
+            "score": 0.00021278858184814453,
+            "hyperparameters": {
+                "depth": 3,
+                "dropout": 0.4,
+                "weight_decay": 0.0075,
+                "width": 32
+            }
+        },
+        "cGAMP Lum": {
+            "score": 1.1920928955078125e-07,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.1,
+                "weight_decay": 0.01,
+                "width": 512
+            }
+        },
+        "LMCpG Abs": {
+            "score": 1.1920928955078125e-07,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.1,
+                "weight_decay": 0.0075,
+                "width": 512
+            }
+        },
+        "LMcGAMP Lum": {
+            "score": 4.172325134277344e-07,
+            "hyperparameters": {
+                "depth": 4,
+                "dropout": 0.3,
+                "weight_decay": 0.01,
+                "width": 32
+            }
+        }
+    }
+}

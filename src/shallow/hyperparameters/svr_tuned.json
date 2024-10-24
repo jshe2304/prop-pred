@@ -1,0 +1,83 @@
+{
+    "model": "svr",
+    "grid_len": 50,
+    "properties": {
+        "Viability Mask 1": {
+            "score": 0.05403060263908788,
+            "hyperparameters": {
+                "C": 1,
+                "gamma": 0.05
+            }
+        },
+        "Viability Mask 2": {
+            "score": 0.07108797309480341,
+            "hyperparameters": {
+                "C": 0.5,
+                "gamma": 0.05
+            }
+        },
+        "LPS Abs": {
+            "score": 0.014950902995964466,
+            "hyperparameters": {
+                "C": 1,
+                "gamma": 0.05
+            }
+        },
+        "LPS Lum": {
+            "score": 0.060593066572870224,
+            "hyperparameters": {
+                "C": 0.5,
+                "gamma": 0.05
+            }
+        },
+        "MPLA Abs": {
+            "score": 0.05226339437368832,
+            "hyperparameters": {
+                "C": 1,
+                "gamma": 0.05
+            }
+        },
+        "MPLA Lum": {
+            "score": 0.20115871321764478,
+            "hyperparameters": {
+                "C": 8,
+                "gamma": 0.1
+            }
+        },
+        "CpG Abs": {
+            "score": 0.14507930269551517,
+            "hyperparameters": {
+                "C": 2,
+                "gamma": 0.05
+            }
+        },
+        "cGAMP Abs": {
+            "score": 0.01830097796577279,
+            "hyperparameters": {
+                "C": 0.25,
+                "gamma": 0.05
+            }
+        },
+        "cGAMP Lum": {
+            "score": 0.12035924284883226,
+            "hyperparameters": {
+                "C": 1,
+                "gamma": 0.05
+            }
+        },
+        "LMCpG Abs": {
+            "score": 0.07807157079664973,
+            "hyperparameters": {
+                "C": 2,
+                "gamma": 0.05
+            }
+        },
+        "LMcGAMP Lum": {
+            "score": 0.12347392528263879,
+            "hyperparameters": {
+                "C": 2,
+                "gamma": 0.05
+            }
+        }
+    }
+}

@@ -65,8 +65,6 @@ for property_label in properties:
     best_params = None
     for params in param_space:
 
-        print(params)
-
         model = Model(**params)
         model.fit(train_X, train_Y)
         score = model.score(test_X, test_Y)
@@ -80,5 +78,5 @@ for property_label in properties:
         'hyperparameters': best_params
     }
 
-with open(f'./hyperparameters/{model_type}.json', 'w') as f:
-    json.dump(tuning_dict, f, indent=4)
+    with open(f'./hyperparameters/{model_type}.json', 'w') as f:
+        json.dump(tuning_dict, f, indent=4)
