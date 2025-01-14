@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=svr
-#SBATCH --error=svr.err
-#SBATCH --output=/dev/null
+#SBATCH --job-name=xgbr-optim
+#SBATCH --error=xgbr.err
+#SBATCH --output=xgbr.out
 
 #SBATCH --account=pi-andrewferguson
 
 #SBATCH --time=36:00:00
 #SBATCH --partition=caslake
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=12
+#SBATCH --ntasks-per-node=32
 #SBATCH --mem-per-cpu=2000
 
 #SBATCH --mail-type=ALL
