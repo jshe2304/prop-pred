@@ -1,4 +1,5 @@
 *.xyz
+./src/data/qm9
 *.pt
 *.pth
 
