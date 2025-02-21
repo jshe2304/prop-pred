@@ -14,11 +14,11 @@ elif [[ "$1" == "gpu" ]]; then
 
 	sinteractive \
 		--account=pi-andrewferguson \
-		--partition=gpu \
+		--partition=andrewferguson-gpu \
 		--time=04:00:00 \
 		--gres=gpu:1 \
 		--nodes=1 \
-		--ntasks-per-node=8
+		--ntasks-per-node=8 \
 
 else
 
