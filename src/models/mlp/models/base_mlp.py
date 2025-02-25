@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
+
 from torch.utils.data import DataLoader, TensorDataset
 
 from tqdm import tqdm
@@ -21,7 +22,7 @@ class BaseMLP(nn.Module):
     def scoring_function(self):
         None
 
-    def score(self, x, y, multioutput='mean'):
+    def score(self, x, y, multioutput='uniform_average'):
         '''
         Compute R^2 score
         '''
@@ -29,16 +30,21 @@ class BaseMLP(nn.Module):
         return self.scoring_function(y, y_pred, multioutput)
 
     def fit(self, \
-            train_X, train_Y, validation_X, validation_Y, \
+            train_X, train_Y, \
+            validation_X, validation_Y, \
+            dataloader=None, \
             lr=0.0001, epochs=512, batch_size=32, \
-            patience=None, plot=False, show_progress=True, \
+            patience=None, plot=False, show_progress=False, \
             *args, **kwargs):
         '''
         Fit the MLP with validation
         '''
 
         # Data
-        dataloader = DataLoader(TensorDataset(train_X, train_Y), batch_size=batch_size, shuffle=True)
+        if dataloader is None:
+            dataloader = DataLoader(TensorDataset(
+                train_X, train_Y
+            ), batch_size=batch_size, shuffle=True)
 
         # Optimizer
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -57,7 +63,7 @@ class BaseMLP(nn.Module):
 
             # SGD Loop
             self.train()
-            for train_x, train_y in dataloader:
+            for train_x, train_y, *_ in dataloader:
                 optimizer.zero_grad()
 
                 self.loss(
@@ -87,7 +93,7 @@ class BaseMLP(nn.Module):
             validation_losses.append(validation_loss)
 
             # Early Stopping
-            if epoch >= stop_interval and epoch % stop_interval == 0:
+            if epoch > stop_interval // 2 and epoch % (stop_interval // 2) == 0:
                 x = torch.arange(0, stop_interval) - (stop_interval / 2) + 0.5
                 y = torch.tensor(validation_losses[-stop_interval:])
                 if x @ y > 0: break

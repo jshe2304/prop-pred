@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/jshe/prop-pred/src/models/mlp/job_multiregression.py", line 52, in <module>
+    f.write(','.join(list(str(score) for score in scores)) + '\n')
+TypeError: 'float' object is not iterable

@@ -75,10 +75,10 @@ class RMLPRegressor(BaseMLP):
         
         self.out_block = nn.Linear(width, out_features)
 
-    def scoring_function(self, y, y_pred, multioutput=None):
+    def scoring_function(self, y, y_pred, multioutput='uniform_average'):
         return r2_score(
             y.detach().cpu(), y_pred.detach().cpu(), 
-            multioutput='raw_values' if multioutput == None else 'uniform_average'
+            multioutput=multioutput
         )
 
     def forward(self, x):

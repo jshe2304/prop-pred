@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name=actual_single
-#SBATCH --error=actual_single.err
-#SBATCH --output=actual_single.out
+#SBATCH --job-name=rmlpembsingle
+#SBATCH --error=rmlpembsingle.err
+#SBATCH --output=/dev/null
 #SBATCH --account=pi-andrewferguson
 #SBATCH --time=36:00:00
 #SBATCH --partition=gpu

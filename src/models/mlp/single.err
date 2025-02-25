@@ -1,0 +1,4 @@
+  File "/home/jshe/prop-pred/src/models/mlp/job_uniregression.py", line 59
+    early_stopping=True, plot=False, show_progress=False
+    ^
+SyntaxError: invalid syntax
