@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=rmlpembsingle
-#SBATCH --error=rmlpembsingle.err
+#SBATCH --job-name=rmlpembmulti
+#SBATCH --error=rmlpembmulti.err
 #SBATCH --output=/dev/null
 #SBATCH --account=pi-andrewferguson
-#SBATCH --time=36:00:00
-#SBATCH --partition=gpu
+#SBATCH --time=03:00:00
+#SBATCH --partition=andrewferguson-gpu
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8

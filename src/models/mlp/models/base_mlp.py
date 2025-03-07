@@ -82,7 +82,7 @@ class BaseMLP(nn.Module):
             )
 
             # Validation Score
-            validation_score = self.score(validation_X, validation_Y, multioutput=None)
+            validation_score = self.score(validation_X, validation_Y, multioutput='raw_values')
             best_score = max(best_score, validation_score.mean())
             if plot: validation_scores.append(validation_score)
 

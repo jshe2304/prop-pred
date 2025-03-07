@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/bin/chemprop_train", line 5, in <module>
+    from chemprop.train import chemprop_train
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/lib/python3.8/site-packages/chemprop/__init__.py", line 1, in <module>
+    import chemprop.data
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/lib/python3.8/site-packages/chemprop/data/__init__.py", line 1, in <module>
+    from .data import cache_graph, cache_mol, MoleculeDatapoint, MoleculeDataset, MoleculeDataLoader, \
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/lib/python3.8/site-packages/chemprop/data/data.py", line 7, in <module>
+    from torch.utils.data import DataLoader, Dataset, Sampler
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/lib/python3.8/site-packages/torch/__init__.py", line 779, in <module>
+    from .serialization import save, load
+  File "/software/python-anaconda-2022.05-el8-x86_64/envs/chemprop/lib/python3.8/site-packages/torch/serialization.py", line 18, in <module>
+    from typing_extensions import TypeAlias
+ModuleNotFoundError: No module named 'typing_extensions'

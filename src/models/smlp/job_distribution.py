@@ -4,13 +4,14 @@ from sklearn.metrics import r2_score
 
 import sys
 sys.path.append('/home/jshe/prop-pred/src/data')
-from data_utils import *
+from data_utils.datasets import SiameseDataset
+from data_utils.load_immuno import *
 
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 
-from smlp import SiameseRMLP, SiameseDataset
+from smlp import DifferenceSiameseRMLP
 
 log_file = sys.argv[1]
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -20,14 +21,11 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 ######
 
 datadir = '../../data/regress_immuno'
-data = to_namedtuple(to_tensor(load_data(datadir), device))
+data = to_namedtuple(to_tensor(load_immuno(datadir, x_type='embeddings'), device))
 
-train_X = data.train.embeddings
-validation_X = data.validation.embeddings
-test_X = data.test.embeddings
-
-train_Var = data.train.y_err ** 2
-validation_Var = data.validation.y_err ** 2
+train_X = data.train.x
+validation_X = data.validation.x
+test_X = data.test.x
 
 train_Y = data.train.y
 validation_Y = data.validation.y
@@ -42,7 +40,7 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 for i in range(64):
     
-    model = SiameseRMLP(
+    model = DifferenceSiameseRMLP(
         in_features=train_X.shape[1], out_features=train_Y.shape[1], 
         depth=2, width=512, 
         dropout=0.4, 
@@ -54,18 +52,18 @@ for i in range(64):
     for epoch in range(1):
     
         # SGD Loop
-        for batch_i, (x1, x2, y1, y2) in enumerate(dataloader):
+        for batch_i, (x, x_ref, y, y_ref) in enumerate(dataloader):
             model.train()
             optimizer.zero_grad()
 
             # Loss
             torch.nn.functional.mse_loss(
-                model.siamese_forward(x1, x2), 
-                y1 - y2
+                model.siamese_forward(x, x_ref), 
+                y - y_ref
             ).backward()
             
             optimizer.step()
-
+    
     # Score
     y_pred_samples = []
     for i in range(512):

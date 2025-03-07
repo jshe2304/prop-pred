@@ -14,9 +14,9 @@
 
 chemprop_train \
 --dataset_type regression \
---data_path $1/train.csv \
---separate_test_path $1/test.csv \
---separate_val_path $1/test.csv \
+--data_path ../../data/regress_immuno/train/train.csv \
+--separate_test_path ../../data/regress_immuno/test/test.csv \
+--separate_val_path ../../data/regress_immuno/validation/validation.csv \
 --config_path ./hyperopt.json \
 --smiles_column SMILES \
 --gpu 0 \

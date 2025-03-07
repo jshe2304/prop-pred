@@ -4,6 +4,32 @@ from sklearn.metrics import r2_score, roc_auc_score
 
 from .base_mlp import BaseMLP
 
+class UpMLPRegressor(BaseMLP):
+    '''
+    Generic MLP
+    '''
+    def __init__(self, in_features, out_features, width, dropout):
+        super().__init__()
+
+        self.loss = nn.MSELoss()
+
+        self.mlp = nn.Sequential(
+            nn.Linear(in_features, width), 
+            nn.ReLU(), 
+            nn.Dropout(dropout), 
+            nn.Linear(width, out_features))
+        )
+
+    def scoring_function(self, y, y_pred, multioutput=None):
+        return r2_score(
+            y.detach().cpu(), y_pred.detach().cpu(), 
+            multioutput='raw_values' if multioutput == None else 'uniform_average'
+        )
+
+    def forward(self, x):
+        return self.mlp(x)
+
+
 class MLPRegressor(BaseMLP):
     '''
     Generic MLP
