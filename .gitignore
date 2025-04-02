@@ -1,9 +1,10 @@
 *.xyz
 *.sdf
-./src/data/
+src/data/
 *.pt
 *.pth
 *.csv
+*.npy
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
