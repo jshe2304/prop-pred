@@ -4,7 +4,7 @@ if [[ "$1" == "cpu" ]]; then
 
 	sinteractive \
 		--account=pi-andrewferguson \
-		--partition=caslake \
+		--partition=gm4-pmext \
 		--time=04:00:00 \
 		--nodes=1 \
 		--ntasks-per-node=8 \

@@ -1,7 +1,9 @@
 *.xyz
-./src/data/qm9
+*.sdf
+./src/data/
 *.pt
 *.pth
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

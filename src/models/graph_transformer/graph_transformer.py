@@ -1,9 +1,22 @@
 import torch
 import torch.nn as nn
+import re
+
+def expand_stack(stack):
+    '''Expand shorthand stack. For example, 4LC -> LCLCLCLC'''
+    expanded, n = '', 1
+    parts = re.findall(r'\d+|[^\d]+', stack)
+    for part in parts:
+        if part.isdigit(): n = int(part)
+        else: expanded += part * n
+
+    return expanded
 
 class MultiheadAttention(nn.Module):
-    def __init__(self, E, H, dropout):
+    def __init__(self, E, H):
         super().__init__()
+
+        assert E % H == 0
 
         self.E, self.H = E, H
         self.scale = (E // H) ** -0.5
@@ -11,7 +24,7 @@ class MultiheadAttention(nn.Module):
         self.QKV = nn.Linear(E, E * 3, bias=False)
         self.out_map = nn.Linear(E, E, bias=False)
 
-    def forward(self, embeddings, mask):
+    def forward(self, embeddings, mask=None, bias=None):
 
         B, L, E = embeddings.size() # Batch, no. Tokens, Embed dim.
         A = E // self.H # Attention dim.
@@ -26,8 +39,11 @@ class MultiheadAttention(nn.Module):
         # Compute masked attention pattern
 
         attn = q @ k.transpose(-2, -1) * self.scale
-        attn = attn.masked_fill_(mask.unsqueeze(1), float('-inf'))
-        attn = torch.softmax(attn, dim=-1).nan_to_num(0)
+        if bias is not None:
+            attn += bias
+        if mask is not None: 
+            attn.masked_fill_(mask, torch.finfo(attn.dtype).min)
+        attn = torch.softmax(attn, dim=-1)
 
         # Compute values
 
@@ -41,7 +57,7 @@ class TransformerBlock(nn.Module):
     def __init__(self, E, H, dropout):
         super().__init__()
         
-        self.attention = MultiheadAttention(E, H, dropout)
+        self.attention = MultiheadAttention(E, H)
         self.norm_1 = nn.LayerNorm(E)
         self.mlp = nn.Sequential(
             nn.Linear(E, E * 4), 
@@ -51,77 +67,101 @@ class TransformerBlock(nn.Module):
         self.norm_2 = nn.LayerNorm(E)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x0, padding_mask, causal_mask):
+    def forward(self, x0, padding_mask, causal_mask=None, bias=None):
 
         # Attention residual block
 
-        x1 = self.attention(x0, causal_mask)
+        x0 = self.norm_1(x0)
+        x1 = self.attention(x0, causal_mask, bias)
         x1 = self.dropout(x1) 
         x2 = x1 + x0
-        x2 = self.norm_1(x2)
 
         # MLP residual block
-        
+
+        x2 = self.norm_2(x2)
         x3 = self.mlp(x2)
+        x3.masked_fill_(padding_mask, 0)
         x3 = self.dropout(x3)
         x4 = x3 + x2
-        x4 = x4.masked_fill(padding_mask, 0)
-        x4 = self.norm_2(x4)
 
         return x4
-
-class LocalGlobalTransformerBlock(nn.Module):
-    def __init__(self, E, H, dropout):
-        super().__init__()
-
-        self.local_block = TransformerBlock(E, H, dropout)
-        self.global_block = TransformerBlock(E, H, dropout)
-
-    def forward(self, x, padding_mask, graph_causal_mask, padding_causal_mask):
-
-        x = self.local_block(x, padding_mask=padding_mask, causal_mask=graph_causal_mask)
-        x = self.global_block(x, padding_mask=padding_mask, causal_mask=padding_causal_mask)
-
-        return x
 
 class GraphTransformer(nn.Module):
     '''
     Transformer with alternating local and global masked self-attention. 
     '''
-    def __init__(self, numerical_features, categorical_features, E, H, D, out_features, dropout):
+    def __init__(self, numerical_features, categorical_features, E, H, stack, out_features, dropout):
         super().__init__()
 
         self.E, self.H = E, H
+        self.stack = expand_stack(stack)
 
+        # Embedding layers
         self.numerical_embed = nn.Linear(numerical_features, E, bias=False)
         self.categorical_embeds = nn.ModuleList([
             nn.Embedding(n_categories, E, padding_idx=0) 
             for n_categories in categorical_features
         ])
+
+        # Transformer blocks
         self.transformer_blocks = nn.ModuleList([
-            LocalGlobalTransformerBlock(E, H, dropout)
-            for _ in range(D)
+            TransformerBlock(E, H, dropout)
+            for _ in range(len(stack))
         ])
+
+        # Out map
+        self.norm = nn.LayerNorm(E)
         self.out_map = nn.Linear(E, out_features)
 
-    def forward(self, numerical_node_features, categorical_node_features, adj, padding):
+    def forward(self, nodes_numerical, nodes_categorical, d, adj, padding):
 
-        B, L, _ = categorical_node_features.size()
+        B, L, _ = nodes_categorical.size()
 
         # Create causal and padding masks
 
         padding_mask = padding.unsqueeze(-1).expand(B, L, self.E)
-        padding_causal_mask = torch.logical_or(
-            padding.unsqueeze(-2), padding.unsqueeze(-1)
-        )
-        graph_causal_mask = ~adj
+        padding_causal_mask = (padding.unsqueeze(-2) | padding.unsqueeze(-1)).unsqueeze(1)
+        graph_causal_mask = ~adj.unsqueeze(1)
+        diag_causal_mask = torch.diag(torch.ones(L)).bool().expand_as(padding_causal_mask).to(padding.device)
+        if 'M' in self.stack:
+            mixed_causal_mask = torch.concat((
+                (padding_causal_mask | diag_causal_mask).expand(B, self.H // 2, L, L), 
+                graph_causal_mask.expand(B, self.H // 2, L, L), 
+            ), dim=1)
+
+        # Create biases
+
+        coulomb_bias = -2 * torch.log(d).unsqueeze(1)
+        electro_bias = -2 * torch.log(d + 0.2).unsqueeze(1)
+        potential_bias = -torch.log(d).unsqueeze(1)
+        if 'M' in self.stack:
+            mixed_bias = torch.concat((
+                coulomb_bias.expand(B, self.H // 2, L, L), 
+                torch.zeros(B, self.H // 2, L, L).to(coulomb_bias.device), 
+            ), dim=1)
 
         # Forward Pass
 
-        x = sum(embed(categorical_node_features[:, :, i]) for i, embed in enumerate(self.categorical_embeds))
-        x += self.numerical_embed(numerical_node_features)
-        for transformer_block in self.transformer_blocks:
-            x = transformer_block(x, padding_mask, graph_causal_mask, padding_causal_mask)
-        x = x.sum(dim=1) # (B, E)
-        x = self.out_map(x)
-        return x
+        x = sum(embed(nodes_categorical[:, :, i]) for i, embed in enumerate(self.categorical_embeds))
+        x += self.numerical_embed(nodes_numerical)
+
+        for block_type, transformer_block in zip(self.stack, self.transformer_blocks):
+            if block_type == 'L': 
+                x = transformer_block(x, padding_mask, graph_causal_mask)
+            elif block_type == 'G': 
+                x = transformer_block(x, padding_mask, padding_causal_mask)
+            elif block_type == 'C': 
+                x = transformer_block(x, padding_mask, padding_causal_mask | diag_causal_mask, coulomb_bias)
+            elif block_type == 'P': 
+                x = transformer_block(x, padding_mask, padding_causal_mask | diag_causal_mask, potential_bias)
+            elif block_type == 'D':
+                x = transformer_block(x, padding_mask, padding_causal_mask | diag_causal_mask, d.unsqueeze(1))
+            elif block_type == 'M':
+                x = transformer_block(x, padding_mask, mixed_causal_mask, mixed_bias)
+            elif block_type == 'E':
+                x = transformer_block(x, padding_mask, padding_causal_mask, electro_bias)
+
+        x = self.norm(x)
+        x = x.mean(dim=1) # (B, E)
+
+        return self.out_map(x)
